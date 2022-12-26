@@ -11,4 +11,4 @@ function connectToDB(){
     mongoose.connect(LOCAL_URL_STRING + "/userDB")
     .then((result) => console.log("Successfully Connected"))
     .catch((err) => console.log("Error connecting! " + err));
-}
+} 
