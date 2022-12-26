@@ -24,7 +24,7 @@ const passportLocalMongoose = require("passport-local-mongoose");
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
 
-
+let callbackMainUrl = "";
 
 const findOrCreate = require('mongoose-findorcreate')
 
@@ -50,7 +50,9 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 ///Connect to Database
-connection.connectToDB();
+const isOnline = connection.connectToDB();
+
+console.log(isOnline);
 
 const userSchema = new mongoose.Schema({
     email: String,
@@ -91,12 +93,17 @@ passport.deserializeUser(function (id, done) {
 })
 
 
-
 // Setup OAUTH for Google
+if(isOnline){
+     callbackMainUrl = "https://elegant-shirt-deer.cyclic.app/auth"
+}
+else{
+     callbackMainUrl = "http://localhost:3000/auth"
+}
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
-    callbackURL: "https://elegant-shirt-deer.cyclic.app/auth/google/secrets",
+    callbackURL: callbackMainUrl + "/google/secrets",
 
     userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo"
 },
@@ -112,7 +119,7 @@ passport.use(new GoogleStrategy({
 passport.use(new FacebookStrategy({
     clientID: process.env.FACEBOOK_APP_ID,
     clientSecret: process.env.FACEBOOK_APP_SECRET,
-    callbackURL: "https://elegant-shirt-deer.cyclic.app/auth/facebook/secrets",
+    callbackURL: callbackMainUrl + "/facebook/secrets",
     // profileFields: ['id', 'displayName', 'photos', 'email']
 },
     function (accessToken, refreshToken, profile, cb) {
